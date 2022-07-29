@@ -4,12 +4,6 @@ on:
   push:
     branches: [ "main" ]
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 # Allow one concurrent deployment
 concurrency:
   group: "pages"
@@ -19,6 +13,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     
+    # Read-only permissions for GITHUB_TOKEN
+    permissions:
+      contents: read
+  
     steps:
     - uses: actions/checkout@v3
 
@@ -32,6 +30,23 @@ jobs:
         npm install
         npm run build
         
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+    
+    runs-on: ubuntu-latest
+    
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+      
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
     - name: Setup Pages
       uses: actions/configure-pages@v1
     
