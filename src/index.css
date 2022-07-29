@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Open+Sans:ital,wght@0,400;0,500;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald&text=Paste+and+Search&display=swap');
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+body,
+button,
+input {
+  font-family: 'Open Sans', Arial, Helvetica, sans-serif;
+}
+
+code,
+pre {
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+}
+
+a,
+a:visited {
+  color: #0066cc;
+}

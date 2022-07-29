@@ -1,3 +1,9 @@
+# VSCode
+.vscode
+
+# Webpack build directory
+build
+
 # Logs
 logs
 *.log
