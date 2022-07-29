@@ -10,6 +10,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  setup-pages:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup Github Pages
+        uses: actions/configure-pages@v1
+    
   build:
     runs-on: ubuntu-latest
     
@@ -30,6 +37,12 @@ jobs:
         npm install
         npm run build
         
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        # Upload build/ folder
+        path: 'build/'
+        
   deploy:
     # Add a dependency to the build job
     needs: build
@@ -47,15 +60,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
       
     steps:
-    - name: Setup Pages
-      uses: actions/configure-pages@v1
-    
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        # Upload build/ folder
-        path: 'build/'
-        
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@main
