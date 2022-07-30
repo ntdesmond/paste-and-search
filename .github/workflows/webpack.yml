@@ -9,6 +9,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
+env:
+  IMGUR_CLIENT_ID: 66418052c59a7d7
+
 jobs:
   setup-pages:
     runs-on: ubuntu-latest
