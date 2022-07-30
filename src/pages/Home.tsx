@@ -4,14 +4,17 @@ import SearchBlock from '../components/search/SearchBlock';
 import ExternalURL from '../components/UI/ExternalURL';
 import uploadImage from '../data/api/imgur';
 import useClipboard from '../hooks/clipboard';
+import useUrlChecking from '../hooks/url';
 
 const Home = () => {
   const pastedData = useClipboard();
   const [file, setFile] = useState<File>();
-  const [imageUrl, setImageUrl] = useState('');
+  const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
+  const imageUrl = useUrlChecking(url);
 
   // Catch a file being pasted
   useEffect(() => {
@@ -27,12 +30,12 @@ const Home = () => {
       return;
     }
     setIsLoading(true);
-    setImageUrl('');
+    setUrl('');
     uploadImage(file)
       .then(
         ({ data, success }) => {
           if (success) {
-            setImageUrl(data.link);
+            setUrl(data.link);
           } else {
             setError((data as any).error || data);
           }
@@ -46,7 +49,7 @@ const Home = () => {
       .finally(() => setIsLoading(false));
   }, [file]);
 
-  if (file === undefined) {
+  if (file === undefined && !imageUrl) {
     return (
       <div>
         <p>Just paste an image!</p>
@@ -55,6 +58,13 @@ const Home = () => {
           <input type="file" ref={fileInputRef} />
           <button type="button" onClick={() => setFile(fileInputRef.current?.files![0])}>
             Upload and search
+          </button>
+        </FlexRow>
+        <p>or...</p>
+        <FlexRow gap="1em">
+          <input type="text" placeholder="Enter an image URL" ref={urlInputRef} />
+          <button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
+            Search
           </button>
         </FlexRow>
       </div>
@@ -68,11 +78,11 @@ const Home = () => {
           Error: <b>{error}</b>
         </p>
       )}
-      {isLoading && <p>Uploading to imgur...</p>}
+      {isLoading && <p>Uploading the image...</p>}
       {imageUrl && (
         <>
           <p>
-            Your image on imgur: <ExternalURL href={imageUrl}>{imageUrl}</ExternalURL>
+            Link to your image: <ExternalURL href={imageUrl}>{imageUrl}</ExternalURL>
           </p>
           <SearchBlock imageUrl={imageUrl} />
         </>
