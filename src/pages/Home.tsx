@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FlexColumn, FlexRow } from '../components/search/layout/alignment/Flex';
 import SearchBlock from '../components/search/SearchBlock';
 import ExternalURL from '../components/UI/ExternalURL';
@@ -6,19 +7,29 @@ import Option from '../components/UI/Option';
 import { ImageUploadMethod } from '../data/api/images/types';
 import useClipboard from '../hooks/clipboard';
 import useImageUpload from '../hooks/imageUpload';
+import useResettableState from '../hooks/resettableState';
 import useUrlChecking from '../hooks/url';
 
 const Home = () => {
   const pastedData = useClipboard();
-  const [file, setFile] = useState<File>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [url, setUrl] = useState('');
-  const [error, setError] = useState('');
+  const location = useLocation();
+  const [file, setFile, clearFile] = useResettableState<File>();
+  const [isLoading, setIsLoading, resetIsLoading] = useResettableState(false);
+  const [error, setError, clearError] = useResettableState('');
   const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
-  const imageUrl = useUrlChecking(url);
+  const imageUrl = useUrlChecking(new URLSearchParams(location.search).get('url') || '');
   const uploadImage = useImageUpload(method);
+  const navigate = useNavigate();
+
+  const setUrl = (url: string) => navigate(`?url=${url}`);
+  const reset = () => {
+    navigate('/');
+    clearFile();
+    resetIsLoading();
+    clearError();
+  };
 
   // Catch a file being pasted
   useEffect(() => {
@@ -34,7 +45,6 @@ const Home = () => {
       return;
     }
     setIsLoading(true);
-    setUrl('');
     uploadImage(file)
       .then(
         (response) => {
@@ -70,7 +80,7 @@ const Home = () => {
         <p>or...</p>
         <FlexRow gap="1em">
           <input type="file" ref={fileInputRef} />
-          <button type="button" onClick={() => setFile(fileInputRef.current?.files![0])}>
+          <button type="button" onClick={() => setFile(fileInputRef.current?.files![0]!)}>
             Upload and search
           </button>
         </FlexRow>
@@ -87,6 +97,9 @@ const Home = () => {
 
   return (
     <div>
+      <button type="button" onClick={reset}>
+        Reset
+      </button>
       {error && (
         <p>
           Error: <b>{error}</b>
