@@ -1,20 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
-import { FlexRow } from '../components/search/layout/alignment/Flex';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { FlexColumn } from '../components/layout/alignment/Flex';
+import SectionHeading from '../components/text/SectionHeading';
 import SearchBlock from '../components/search/SearchBlock';
+import BulletPoint from '../components/UI/BulletPoint';
 import ExternalURL from '../components/UI/ExternalURL';
-import uploadImage from '../data/api/imgur';
+import Option from '../components/UI/Option';
+import MethodName from '../components/uploading/MethodName';
+import { ImageUploadMethod } from '../data/api/images/types';
 import useClipboard from '../hooks/clipboard';
+import useImageUpload from '../hooks/imageUpload';
+import useResettableState from '../hooks/resettableState';
 import useUrlChecking from '../hooks/url';
+import MainHeading from '../components/text/MainHeading';
+import FileUploader from '../components/uploading/FileUploader';
+import InputBar from '../components/UI/InputBar';
 
 const Home = () => {
   const pastedData = useClipboard();
-  const [file, setFile] = useState<File>();
-  const [url, setUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const location = useLocation();
+  const [file, setFile, clearFile] = useResettableState<File>();
+  const [isLoading, setIsLoading, resetIsLoading] = useResettableState(false);
+  const [error, setError, clearError] = useResettableState('');
+  const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
-  const imageUrl = useUrlChecking(url);
+  const imageUrl = useUrlChecking(new URLSearchParams(location.search).get('url') || '');
+  const uploadImage = useImageUpload(method);
+  const navigate = useNavigate();
+
+  const setUrl = (url: string) => navigate(`?url=${url}`);
+  const reset = () => {
+    navigate('/');
+    clearFile();
+    resetIsLoading();
+    clearError();
+  };
 
   // Catch a file being pasted
   useEffect(() => {
@@ -30,14 +51,13 @@ const Home = () => {
       return;
     }
     setIsLoading(true);
-    setUrl('');
     uploadImage(file)
       .then(
-        ({ data, success }) => {
-          if (success) {
-            setUrl(data.link);
+        (response) => {
+          if (response.error === undefined) {
+            setUrl(response.url!);
           } else {
-            setError((data as any).error || data);
+            setError(response.error);
           }
         },
         (err) => {
@@ -51,43 +71,69 @@ const Home = () => {
 
   if (file === undefined && !imageUrl) {
     return (
-      <div>
-        <p>Just paste an image!</p>
-        <p>or...</p>
-        <FlexRow gap="1em">
-          <input type="file" ref={fileInputRef} />
-          <button type="button" onClick={() => setFile(fileInputRef.current?.files![0])}>
-            Upload and search
-          </button>
-        </FlexRow>
-        <p>or...</p>
-        <FlexRow gap="1em">
-          <input type="text" placeholder="Enter an image URL" ref={urlInputRef} />
-          <button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
-            Search
-          </button>
-        </FlexRow>
-      </div>
+      <>
+        <FlexColumn gap="1em">
+          <SectionHeading>Uploading method:</SectionHeading>
+          <Option name="method" value="imgbb" onChecked={() => setMethod('imgbb')} defaultChecked>
+            <MethodName>ImgBB</MethodName>
+            <BulletPoint>Uploaded files will be autodeleted in 10 minutes</BulletPoint>
+            <BulletPoint>Supports WEBP images</BulletPoint>
+          </Option>
+          <Option name="method" value="imgur" onChecked={() => setMethod('imgur')}>
+            <MethodName>Imgur</MethodName>
+            <BulletPoint>The file will not be deleted (hopefully)</BulletPoint>
+            <BulletPoint>
+              May not work with some search engines (see{' '}
+              <ExternalURL href="https://saucenao.blogspot.com/2021/04/recent-events.html">
+                this post
+              </ExternalURL>
+              )
+            </BulletPoint>
+          </Option>
+        </FlexColumn>
+        <FlexColumn gap="1em" align="center">
+          <MainHeading>Just paste an image!</MainHeading>
+          <div>or...</div>
+          <InputBar>
+            <FileUploader accept="image/*" ref={fileInputRef} />
+            <button type="button" onClick={() => setFile(fileInputRef.current?.files![0]!)}>
+              Search
+            </button>
+          </InputBar>
+          <div>or...</div>
+          <InputBar>
+            <input type="text" placeholder="Enter an image URL" ref={urlInputRef} />
+            <button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
+              Search
+            </button>
+          </InputBar>
+        </FlexColumn>
+      </>
     );
   }
 
   return (
-    <div>
+    <FlexColumn gap="1em" align="flex-start">
+      <button type="button" onClick={reset}>
+        Reset
+      </button>
       {error && (
-        <p>
-          Error: <b>{error}</b>
-        </p>
+        <section>
+          <SectionHeading>Error:</SectionHeading>
+          <code>{error}</code>
+        </section>
       )}
       {isLoading && <p>Uploading the image...</p>}
       {imageUrl && (
-        <>
-          <p>
-            Link to your image: <ExternalURL href={imageUrl}>{imageUrl}</ExternalURL>
-          </p>
+        <FlexColumn gap="2em">
+          <section>
+            <SectionHeading>Link to your image:</SectionHeading>
+            <ExternalURL href={imageUrl}>{imageUrl}</ExternalURL>
+          </section>
           <SearchBlock imageUrl={imageUrl} />
-        </>
+        </FlexColumn>
       )}
-    </div>
+    </FlexColumn>
   );
 };
 

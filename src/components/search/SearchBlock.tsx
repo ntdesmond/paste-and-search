@@ -6,22 +6,23 @@ import Ascii2D from './engines/nerd/Ascii2D';
 import IQDB from './engines/nerd/IQDB';
 import SauceNao from './engines/nerd/SauceNao';
 import TraceMoe from './engines/nerd/TraceMoe';
-import { FlexColumn, FlexRow } from './layout/alignment/Flex';
+import { FlexColumn, FlexRow } from '../layout/alignment/Flex';
 import Bing from './engines/common/Bing';
+import SectionHeading from '../text/SectionHeading';
 
 const SearchBlock = ({ imageUrl }: EngineProps) => (
   <FlexColumn gap="2em">
-    <div>
-      <div>Common engines:</div>
+    <section>
+      <SectionHeading>Common engines:</SectionHeading>
       <FlexRow gap="1em">
         <Google imageUrl={imageUrl} />
         <Yandex imageUrl={imageUrl} />
         <Bing imageUrl={imageUrl} />
         <TinEye imageUrl={imageUrl} />
       </FlexRow>
-    </div>
-    <div>
-      <div>Nerd engines:</div>
+    </section>
+    <section>
+      <SectionHeading>Nerd engines:</SectionHeading>
       <FlexColumn gap="1em">
         <div>
           <SauceNao imageUrl={imageUrl} /> (<code>image source locator</code>, combination of
@@ -40,7 +41,7 @@ const SearchBlock = ({ imageUrl }: EngineProps) => (
           <TraceMoe imageUrl={imageUrl} /> (Anime Scene Search)
         </div>
       </FlexColumn>
-    </div>
+    </section>
   </FlexColumn>
 );
 
