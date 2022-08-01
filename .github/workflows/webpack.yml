@@ -2,67 +2,68 @@ name: Build Webpack and deploy to Pages
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
 
 # Allow one concurrent deployment
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 env:
   IMGUR_CLIENT_ID: 66418052c59a7d7
+  IMGBB_KEY: a6dc631df939f8b9dc0256d330a37b3e
 
 jobs:
   setup-pages:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Setup Github Pages
         uses: actions/configure-pages@v1
-    
+
   build:
     runs-on: ubuntu-latest
-    
+
     # Read-only permissions for GITHUB_TOKEN
     permissions:
       contents: read
-  
+
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-    - name: Build the project
-      run: |
-        npm install
-        npm run build
-        
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        # Upload build/ folder
-        path: 'build/'
-        
+      - name: Build the project
+        run: |
+          npm install
+          npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          # Upload build/ folder
+          path: 'build/'
+
   deploy:
     # Add a dependency to the build job
     needs: build
-    
+
     runs-on: ubuntu-latest
-    
+
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-      
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
     # Deploy to the github-pages environment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-      
+
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@main
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@main

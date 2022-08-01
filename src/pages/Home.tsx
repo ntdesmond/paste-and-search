@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import { FlexRow } from '../components/search/layout/alignment/Flex';
+import { FlexColumn, FlexRow } from '../components/search/layout/alignment/Flex';
 import SearchBlock from '../components/search/SearchBlock';
 import ExternalURL from '../components/UI/ExternalURL';
-import uploadImage from '../data/api/imgur';
+import Option from '../components/UI/Option';
+import { ImageUploadMethod } from '../data/api/images/types';
 import useClipboard from '../hooks/clipboard';
+import useImageUpload from '../hooks/imageUpload';
 import useUrlChecking from '../hooks/url';
 
 const Home = () => {
   const pastedData = useClipboard();
   const [file, setFile] = useState<File>();
-  const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [url, setUrl] = useState('');
   const [error, setError] = useState('');
+  const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const imageUrl = useUrlChecking(url);
+  const uploadImage = useImageUpload(method);
 
   // Catch a file being pasted
   useEffect(() => {
@@ -33,11 +37,11 @@ const Home = () => {
     setUrl('');
     uploadImage(file)
       .then(
-        ({ data, success }) => {
-          if (success) {
-            setUrl(data.link);
+        (response) => {
+          if (response.error === undefined) {
+            setUrl(response.url!);
           } else {
-            setError((data as any).error || data);
+            setError(response.error);
           }
         },
         (err) => {
@@ -52,7 +56,17 @@ const Home = () => {
   if (file === undefined && !imageUrl) {
     return (
       <div>
-        <p>Just paste an image!</p>
+        <FlexColumn gap="1em">
+          <div>Uploading method:</div>
+          <Option name="method" value="imgbb" onChecked={() => setMethod('imgbb')} defaultChecked>
+            ImgBB &mdash; the file will be autodeleted in 10 minutes
+          </Option>
+          <Option name="method" value="imgur" onChecked={() => setMethod('imgur')}>
+            Imgur &mdash; the file will not be deleted, though this method may not work with some
+            search engines
+          </Option>
+        </FlexColumn>
+        <h1>Just paste an image!</h1>
         <p>or...</p>
         <FlexRow gap="1em">
           <input type="file" ref={fileInputRef} />
