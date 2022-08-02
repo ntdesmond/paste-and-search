@@ -50,6 +50,7 @@ const Home = () => {
     if (file === undefined) {
       return;
     }
+    navigate('/');
     setIsLoading(true);
     uploadImage(file)
       .then(
