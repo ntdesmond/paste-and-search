@@ -5,16 +5,18 @@ import SectionHeading from '../components/text/SectionHeading';
 import SearchBlock from '../components/search/SearchBlock';
 import BulletPoint from '../components/UI/BulletPoint';
 import ExternalURL from '../components/UI/ExternalURL';
-import Option from '../components/UI/Option';
-import MethodName from '../components/uploading/MethodName';
+import Option from '../components/UI/input/Option';
+import UploadMethodName from '../components/UI/UploadMethodName';
 import { ImageUploadMethod } from '../data/api/images/types';
 import useClipboard from '../hooks/clipboard';
 import useImageUpload from '../hooks/imageUpload';
 import useResettableState from '../hooks/resettableState';
 import useUrlChecking from '../hooks/url';
 import MainHeading from '../components/text/MainHeading';
-import FileUploader from '../components/uploading/FileUploader';
-import InputBar from '../components/UI/InputBar';
+import FileUploader from '../components/UI/input/FileUploader';
+import InputBar from '../components/UI/input/InputBar';
+import Button, { ResetButton } from '../components/UI/input/Button';
+import URLInput from '../components/UI/input/URLInput';
 
 const Home = () => {
   const pastedData = useClipboard();
@@ -76,12 +78,12 @@ const Home = () => {
         <FlexColumn gap="1em">
           <SectionHeading>Uploading method:</SectionHeading>
           <Option name="method" value="imgbb" onChecked={() => setMethod('imgbb')} defaultChecked>
-            <MethodName>ImgBB</MethodName>
+            <UploadMethodName>ImgBB</UploadMethodName>
             <BulletPoint>Uploaded files will be autodeleted in 10 minutes</BulletPoint>
             <BulletPoint>Supports WEBP images</BulletPoint>
           </Option>
           <Option name="method" value="imgur" onChecked={() => setMethod('imgur')}>
-            <MethodName>Imgur</MethodName>
+            <UploadMethodName>Imgur</UploadMethodName>
             <BulletPoint>The file will not be deleted (hopefully)</BulletPoint>
             <BulletPoint>
               May not work with some search engines (see{' '}
@@ -97,16 +99,16 @@ const Home = () => {
           <div>or...</div>
           <InputBar>
             <FileUploader accept="image/*" ref={fileInputRef} />
-            <button type="button" onClick={() => setFile(fileInputRef.current?.files![0]!)}>
+            <Button type="button" onClick={() => setFile(fileInputRef.current?.files![0]!)}>
               Search
-            </button>
+            </Button>
           </InputBar>
           <div>or...</div>
           <InputBar>
-            <input type="text" placeholder="Enter an image URL" ref={urlInputRef} />
-            <button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
+            <URLInput placeholder="Enter an image URL" ref={urlInputRef} />
+            <Button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
               Search
-            </button>
+            </Button>
           </InputBar>
         </FlexColumn>
       </>
@@ -115,9 +117,9 @@ const Home = () => {
 
   return (
     <FlexColumn gap="1em" align="flex-start">
-      <button type="button" onClick={reset}>
+      <ResetButton type="button" onClick={reset}>
         Reset
-      </button>
+      </ResetButton>
       {error && (
         <section>
           <SectionHeading>Error:</SectionHeading>

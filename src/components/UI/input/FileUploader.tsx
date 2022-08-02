@@ -10,8 +10,13 @@ const HiddenInput = styled.input`
 const LabelContent = styled.div`
   text-align: center;
   padding: 0.2em;
-  border: 1px solid #777;
+  border: 1px solid #888;
   border-radius: 5px;
+  cursor: pointer;
+
+  :hover {
+    background-color: #8882;
+  }
 `;
 
 type FileSelectedCallback = (file: File) => void;
