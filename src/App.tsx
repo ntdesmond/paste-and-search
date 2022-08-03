@@ -77,7 +77,7 @@ const App = () => {
         (err) => {
           // eslint-disable-next-line no-console
           console.log(err);
-          setError(err);
+          setError(JSON.stringify(err));
         },
       )
       .finally(() => setIsLoading(false));
