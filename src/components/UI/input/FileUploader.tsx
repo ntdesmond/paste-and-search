@@ -1,7 +1,7 @@
-import React, { ChangeEventHandler, useState } from 'react';
+import React, { ChangeEventHandler, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-type UploaderProps = { id?: string; onFileSelected?: FileSelectedCallback; accept?: string };
+type UploaderProps = { id?: string; onFileChanged?: FileSelectedCallback; accept?: string };
 
 const HiddenInput = styled.input`
   display: none;
@@ -19,24 +19,29 @@ const LabelContent = styled.div`
   }
 `;
 
-type FileSelectedCallback = (file: File) => void;
+type FileSelectedCallback = (file: File | null) => void;
 
 const onChangeWrapper = (handler: FileSelectedCallback) => {
   const wrapper: ChangeEventHandler<HTMLInputElement> = (e) => {
     const files = e.target.files!;
-    if (files.length > 0) {
-      const file = files[0];
-      handler(file);
-    }
+    const file = files[0] || null;
+    handler(file);
   };
 
   return wrapper;
 };
 
 const FileUploader = React.forwardRef<HTMLInputElement, UploaderProps>((props, ref) => {
-  const [filename, setFilename] = useState('');
+  const [filename, setFilename] = useState<string>();
 
   const inputId = props.id === undefined ? 'file-input' : `${props.id}-file-input`;
+
+  // Reset the file on first render
+  useEffect(() => {
+    if (props.onFileChanged !== undefined) {
+      props.onFileChanged(null);
+    }
+  }, []);
 
   return (
     <label htmlFor={inputId}>
@@ -44,9 +49,9 @@ const FileUploader = React.forwardRef<HTMLInputElement, UploaderProps>((props, r
         id={inputId}
         type="file"
         onChange={onChangeWrapper((file) => {
-          setFilename(file.name);
-          if (props.onFileSelected !== undefined) {
-            props.onFileSelected(file);
+          setFilename(file?.name);
+          if (props.onFileChanged !== undefined) {
+            props.onFileChanged(file);
           }
         })}
         accept={props.accept}

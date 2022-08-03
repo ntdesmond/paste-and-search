@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FlexColumn } from '../components/layout/alignment/Flex';
 import SectionHeading from '../components/text/SectionHeading';
@@ -25,19 +25,26 @@ const Home = () => {
   const [isLoading, setIsLoading, resetIsLoading] = useResettableState(false);
   const [error, setError, clearError] = useResettableState('');
   const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const urlInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [inputtedURL, setInputtedURL] = useState<string | null>(null);
   const imageUrl = useUrlChecking(new URLSearchParams(location.search).get('url') || '');
   const uploadImage = useImageUpload(method);
   const navigate = useNavigate();
 
-  const setUrl = (url: string) => navigate(`?url=${url}`);
+  const setUrl = (url: string | null) => url !== null && navigate(`?url=${url}`);
   const reset = () => {
     navigate('/');
     clearFile();
     resetIsLoading();
     clearError();
   };
+
+  // Drop invalid URLs
+  useEffect(() => {
+    if (imageUrl === null) {
+      navigate('/');
+    }
+  }, [imageUrl]);
 
   // Catch a file being pasted
   useEffect(() => {
@@ -98,15 +105,19 @@ const Home = () => {
           <MainHeading>Just paste an image!</MainHeading>
           <div>or...</div>
           <InputBar>
-            <FileUploader accept="image/*" ref={fileInputRef} />
-            <Button type="button" onClick={() => setFile(fileInputRef.current?.files![0]!)}>
+            <FileUploader accept="image/*" onFileChanged={setSelectedFile} />
+            <Button type="button" onClick={() => selectedFile !== null && setFile(selectedFile)}>
               Search
             </Button>
           </InputBar>
           <div>or...</div>
           <InputBar>
-            <URLInput placeholder="Enter an image URL" ref={urlInputRef} />
-            <Button type="button" onClick={() => setUrl(urlInputRef.current?.value!)}>
+            <URLInput
+              placeholder="Enter an image URL"
+              onUrlSubmitted={setUrl}
+              onUrlChanged={setInputtedURL}
+            />
+            <Button type="button" onClick={() => setUrl(inputtedURL)}>
               Search
             </Button>
           </InputBar>

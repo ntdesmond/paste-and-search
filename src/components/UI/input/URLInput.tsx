@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useUrlChecking from '../../../hooks/url';
 
-type URLInputProps = { onUrlEntered?: URLEnteredCallback; placeholder?: string };
+type URLInputProps = {
+  onUrlSubmitted?: URLSubmitCallback;
+  onUrlChanged?: URLChangeCallback;
+  placeholder?: string;
+};
 
 const StyledInput = styled.input`
   padding: 0.2em;
@@ -10,15 +14,16 @@ const StyledInput = styled.input`
   border-radius: 5px;
 `;
 
-type URLEnteredCallback = (text: string) => void;
+type URLSubmitCallback = (url: string) => void;
+type URLChangeCallback = (url: string | null) => void;
 
-const URLInput = React.forwardRef<HTMLInputElement, URLInputProps>((props, ref) => {
+const URLInput = (props: URLInputProps) => {
   const [text, setText] = useState('');
   const url = useUrlChecking(text);
 
   useEffect(() => {
-    if (url !== null && props.onUrlEntered !== undefined) {
-      props.onUrlEntered(url);
+    if (props.onUrlChanged !== undefined) {
+      props.onUrlChanged(url);
     }
   }, [url]);
 
@@ -28,10 +33,14 @@ const URLInput = React.forwardRef<HTMLInputElement, URLInputProps>((props, ref) 
       onChange={(e) => {
         setText(e.target.value);
       }}
+      onKeyDown={(e) => {
+        if (props.onUrlSubmitted !== undefined && url !== null && e.key === 'Enter') {
+          props.onUrlSubmitted(url);
+        }
+      }}
       placeholder={props.placeholder}
-      ref={ref}
     />
   );
-});
+};
 
 export default URLInput;
