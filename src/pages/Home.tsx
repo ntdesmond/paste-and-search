@@ -39,6 +39,8 @@ const Home = () => {
     clearFile();
     resetIsLoading();
     clearError();
+    clearFileError();
+    clearUrlError();
   };
 
   // Drop invalid URLs
