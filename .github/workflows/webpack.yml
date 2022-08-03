@@ -9,10 +9,6 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 
-env:
-  IMGUR_CLIENT_ID: 66418052c59a7d7
-  IMGBB_KEY: a6dc631df939f8b9dc0256d330a37b3e
-
 jobs:
   setup-pages:
     runs-on: ubuntu-latest
@@ -31,12 +27,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
 
       - name: Build the project
+        env:
+          IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+          IMGBB_KEY: ${{ secrets.IMGBB_KEY }}
+        
         run: |
           npm install
           npm run build
