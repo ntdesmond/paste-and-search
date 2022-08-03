@@ -14,7 +14,7 @@ import useResettableState from '../hooks/resettableState';
 import useUrlChecking from '../hooks/url';
 import MainHeading from '../components/text/MainHeading';
 import FileUploader from '../components/UI/input/FileUploader';
-import InputBar from '../components/UI/input/InputBar';
+import InputBlock from '../components/UI/input/InputBlock';
 import Button, { ResetButton } from '../components/UI/input/Button';
 import URLInput from '../components/UI/input/URLInput';
 
@@ -24,6 +24,8 @@ const Home = () => {
   const [file, setFile, clearFile] = useResettableState<File>();
   const [isLoading, setIsLoading, resetIsLoading] = useResettableState(false);
   const [error, setError, clearError] = useResettableState('');
+  const [fileError, setFileError, clearFileError] = useResettableState('');
+  const [urlError, setUrlError, clearUrlError] = useResettableState('');
   const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [inputtedURL, setInputtedURL] = useState<string | null>(null);
@@ -31,7 +33,7 @@ const Home = () => {
   const uploadImage = useImageUpload(method);
   const navigate = useNavigate();
 
-  const setUrl = (url: string | null) => url !== null && navigate(`?url=${url}`);
+  const setUrl = (url: string) => navigate(`?url=${url}`);
   const reset = () => {
     navigate('/');
     clearFile();
@@ -79,6 +81,38 @@ const Home = () => {
       .finally(() => setIsLoading(false));
   }, [file]);
 
+  // Input errors clearing
+  useEffect(() => {
+    if (selectedFile !== null) {
+      clearFileError();
+    }
+  }, [selectedFile]);
+
+  useEffect(() => {
+    if (inputtedURL !== null) {
+      clearUrlError();
+    }
+  }, [inputtedURL]);
+
+  // Button actions
+  const onFileSubmit = () => {
+    if (selectedFile === null) {
+      setFileError('Select a file first');
+      return;
+    }
+    clearFileError();
+    setFile(selectedFile);
+  };
+
+  const onUrlSubmit = () => {
+    if (inputtedURL === null) {
+      setUrlError('Input a valid URL first');
+      return;
+    }
+    clearUrlError();
+    setUrl(inputtedURL);
+  };
+
   if (file === undefined && !imageUrl) {
     return (
       <>
@@ -104,23 +138,23 @@ const Home = () => {
         <FlexColumn gap="1em" align="center">
           <MainHeading>Just paste an image!</MainHeading>
           <div>or...</div>
-          <InputBar>
+          <InputBlock errorText={fileError}>
             <FileUploader accept="image/*" onFileChanged={setSelectedFile} />
-            <Button type="button" onClick={() => selectedFile !== null && setFile(selectedFile)}>
+            <Button type="button" onClick={onFileSubmit}>
               Search
             </Button>
-          </InputBar>
+          </InputBlock>
           <div>or...</div>
-          <InputBar>
+          <InputBlock errorText={urlError}>
             <URLInput
               placeholder="Enter an image URL"
               onUrlSubmitted={setUrl}
               onUrlChanged={setInputtedURL}
             />
-            <Button type="button" onClick={() => setUrl(inputtedURL)}>
+            <Button type="button" onClick={onUrlSubmit}>
               Search
             </Button>
-          </InputBar>
+          </InputBlock>
         </FlexColumn>
       </>
     );
