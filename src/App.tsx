@@ -17,6 +17,7 @@ import FileUploader from './components/UI/input/FileUploader';
 import InputBlock from './components/UI/input/InputBlock';
 import Button, { ResetButton } from './components/UI/input/Button';
 import URLInput from './components/UI/input/URLInput';
+import Loading from './components/UI/loading';
 
 const App = () => {
   const pastedData = useClipboard();
@@ -174,7 +175,7 @@ const App = () => {
           <code>{error}</code>
         </section>
       )}
-      {isLoading && <p>Uploading the image...</p>}
+      {isLoading && <Loading>Uploading the image...</Loading>}
       {imageUrl && (
         <FlexColumn gap="2em">
           <section>
