@@ -43,6 +43,9 @@ const App = () => {
     clearUrlError();
   };
 
+  // Reset on load
+  useEffect(reset, []);
+
   // Drop invalid URLs
   useEffect(() => {
     if (imageUrl === null) {
@@ -70,6 +73,7 @@ const App = () => {
         (response) => {
           if (response.error === undefined) {
             setUrl(response.url!);
+            clearFile();
           } else {
             setError(response.error);
           }
@@ -108,7 +112,7 @@ const App = () => {
 
   const onUrlSubmit = () => {
     if (inputtedURL === null) {
-      setUrlError('Input a valid URL first');
+      setUrlError('Not a valid URL');
       return;
     }
     clearUrlError();
@@ -150,8 +154,8 @@ const App = () => {
           <InputBlock errorText={urlError}>
             <URLInput
               placeholder="Enter an image URL"
-              onUrlSubmitted={setUrl}
-              onUrlChanged={setInputtedURL}
+              onUrlSubmit={onUrlSubmit}
+              onUrlChange={setInputtedURL}
             />
             <Button type="button" onClick={onUrlSubmit}>
               Search
