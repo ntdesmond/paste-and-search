@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FlexRow } from '../layout/alignment/Flex';
+import { FlexRow } from '../../layout/alignment/Flex';
 
 const InputBar = styled(FlexRow)`
   width: 100%;

@@ -1,9 +1,14 @@
 import { ReactNode } from 'react';
+import styled from 'styled-components';
+
+const StyledAnchor = styled.a`
+  word-wrap: anywhere;
+`;
 
 const ExternalURL = (props: { children: ReactNode; href: string }) => (
-  <a href={props.href} target="_blank" rel="noreferrer">
+  <StyledAnchor href={props.href} target="_blank" rel="noreferrer">
     {props.children}
-  </a>
+  </StyledAnchor>
 );
 
 export default ExternalURL;
