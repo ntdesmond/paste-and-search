@@ -43,9 +43,6 @@ const App = () => {
     clearUrlError();
   };
 
-  // Reset on load
-  useEffect(reset, []);
-
   // Drop invalid URLs
   useEffect(() => {
     if (imageUrl === null) {
