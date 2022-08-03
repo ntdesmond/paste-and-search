@@ -1,18 +1,18 @@
 import React, { ChangeEventHandler, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import Button from './Button';
 
-type UploaderProps = { id?: string; onFileChanged?: FileSelectedCallback; accept?: string };
+type UploaderProps = { onFileChanged?: FileSelectedCallback; accept?: string };
 
 const HiddenInput = styled.input`
   display: none;
 `;
 
-const LabelContent = styled.div`
-  text-align: center;
-  padding: 0.2em;
-  border: 1px solid #888;
-  border-radius: 5px;
-  cursor: pointer;
+const StyledUploader = styled(Button)`
+  background-color: #8881;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   :hover {
     background-color: #8882;
@@ -31,10 +31,9 @@ const onChangeWrapper = (handler: FileSelectedCallback) => {
   return wrapper;
 };
 
-const FileUploader = React.forwardRef<HTMLInputElement, UploaderProps>((props, ref) => {
+const FileUploader = (props: UploaderProps) => {
   const [filename, setFilename] = useState<string>();
-
-  const inputId = props.id === undefined ? 'file-input' : `${props.id}-file-input`;
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   // Reset the file on first render
   useEffect(() => {
@@ -44,9 +43,8 @@ const FileUploader = React.forwardRef<HTMLInputElement, UploaderProps>((props, r
   }, []);
 
   return (
-    <label htmlFor={inputId}>
+    <StyledUploader type="button" onClick={() => inputRef.current?.click()}>
       <HiddenInput
-        id={inputId}
         type="file"
         onChange={onChangeWrapper((file) => {
           setFilename(file?.name);
@@ -55,11 +53,11 @@ const FileUploader = React.forwardRef<HTMLInputElement, UploaderProps>((props, r
           }
         })}
         accept={props.accept}
-        ref={ref}
+        ref={inputRef}
       />
-      <LabelContent>{filename || 'Upload a file'}</LabelContent>
-    </label>
+      {filename || 'Upload a file'}
+    </StyledUploader>
   );
-});
+};
 
 export default FileUploader;

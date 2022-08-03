@@ -6,6 +6,10 @@ const StyledLayout = styled(FlexColumn)`
   width: 100%;
   align-items: center;
   gap: 2em;
+
+  > * {
+    max-width: 100%;
+  }
 `;
 
 const Layout = (props: { children: ReactNode }) => (
