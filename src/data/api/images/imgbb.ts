@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ImageUploadFunction } from './types';
 
-const uploadImgBB: ImageUploadFunction = async (image: File) => {
+const uploadImgBB: ImageUploadFunction = async (image: Blob) => {
   const form = new FormData();
   form.append('image', image);
   return axios

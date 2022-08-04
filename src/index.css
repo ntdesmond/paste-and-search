@@ -7,6 +7,12 @@ body,
   height: 100%;
 }
 
+body {
+  margin: 0;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
 body,
 button,
 input {

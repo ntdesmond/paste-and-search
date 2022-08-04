@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import useUrlChecking from '../../../hooks/url';
 
+type URLCallback = (url: string | null) => void;
 type URLInputProps = {
-  onUrlSubmitted?: URLSubmitCallback;
-  onUrlChanged?: URLChangeCallback;
+  onUrlSubmit?: URLCallback;
+  onUrlChange?: URLCallback;
   placeholder?: string;
 };
 
@@ -14,16 +15,13 @@ const StyledInput = styled.input`
   border-radius: 5px;
 `;
 
-type URLSubmitCallback = (url: string) => void;
-type URLChangeCallback = (url: string | null) => void;
-
 const URLInput = (props: URLInputProps) => {
   const [text, setText] = useState('');
   const url = useUrlChecking(text);
 
   useEffect(() => {
-    if (props.onUrlChanged !== undefined) {
-      props.onUrlChanged(url);
+    if (props.onUrlChange !== undefined) {
+      props.onUrlChange(url);
     }
   }, [url]);
 
@@ -34,8 +32,11 @@ const URLInput = (props: URLInputProps) => {
         setText(e.target.value);
       }}
       onKeyDown={(e) => {
-        if (props.onUrlSubmitted !== undefined && url !== null && e.key === 'Enter') {
-          props.onUrlSubmitted(url);
+        if (e.key !== 'Enter') {
+          return;
+        }
+        if (props.onUrlSubmit !== undefined) {
+          props.onUrlSubmit(url);
         }
       }}
       placeholder={props.placeholder}

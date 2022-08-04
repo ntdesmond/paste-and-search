@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { FlexColumn } from './components/layout/alignment/Flex';
 import SectionHeading from './components/text/SectionHeading';
 import SearchBlock from './components/search/SearchBlock';
@@ -8,7 +9,7 @@ import ExternalURL from './components/UI/ExternalURL';
 import Option from './components/UI/input/Option';
 import UploadMethodName from './components/UI/UploadMethodName';
 import { ImageUploadMethod } from './data/api/images/types';
-import useClipboard from './hooks/clipboard';
+import usePasteEvent from './hooks/clipboard/pasteEvent';
 import useImageUpload from './hooks/imageUpload';
 import useResettableState from './hooks/resettableState';
 import useUrlChecking from './hooks/url';
@@ -17,13 +18,22 @@ import FileUploader from './components/UI/input/FileUploader';
 import InputBlock from './components/UI/input/InputBlock';
 import Button, { ResetButton } from './components/UI/input/Button';
 import URLInput from './components/UI/input/URLInput';
+import Loading from './components/UI/Loading';
+import useClipboardReadAction from './hooks/clipboard/clipboardRead';
+import InputError from './components/UI/input/InputError';
+
+const PasteError = styled(InputError)`
+  margin: -0.5em 0;
+`;
 
 const App = () => {
-  const pastedData = useClipboard();
+  const pastedData = usePasteEvent();
+  const clipboardReadAction = useClipboardReadAction();
   const location = useLocation();
-  const [file, setFile, clearFile] = useResettableState<File>();
+  const [file, setFile, clearFile] = useResettableState<Blob>();
   const [isLoading, setIsLoading, resetIsLoading] = useResettableState(false);
   const [error, setError, clearError] = useResettableState('');
+  const [pasteError, setPasteError, clearPasteError] = useResettableState('');
   const [fileError, setFileError, clearFileError] = useResettableState('');
   const [urlError, setUrlError, clearUrlError] = useResettableState('');
   const [method, setMethod] = useState<ImageUploadMethod>('imgbb');
@@ -52,7 +62,13 @@ const App = () => {
 
   // Catch a file being pasted
   useEffect(() => {
+    if (pastedData === null || pastedData === undefined) {
+      return;
+    }
+
+    clearPasteError();
     if (!(pastedData instanceof File)) {
+      setPasteError('No images found in the clipboard.');
       return;
     }
     setFile(pastedData);
@@ -70,6 +86,7 @@ const App = () => {
         (response) => {
           if (response.error === undefined) {
             setUrl(response.url!);
+            clearFile();
           } else {
             setError(response.error);
           }
@@ -97,6 +114,18 @@ const App = () => {
   }, [inputtedURL]);
 
   // Button actions
+  const onPasteButtonClick = () => {
+    if (clipboardReadAction === null) {
+      return;
+    }
+
+    clearPasteError();
+    clipboardReadAction().then(
+      (blob) => setFile(blob),
+      (err: Error) => setPasteError(err.message),
+    );
+  };
+
   const onFileSubmit = () => {
     if (selectedFile === null) {
       setFileError('Select a file first');
@@ -108,7 +137,7 @@ const App = () => {
 
   const onUrlSubmit = () => {
     if (inputtedURL === null) {
-      setUrlError('Input a valid URL first');
+      setUrlError('Not a valid URL');
       return;
     }
     clearUrlError();
@@ -120,12 +149,22 @@ const App = () => {
       <>
         <FlexColumn gap="1em">
           <SectionHeading>Uploading method:</SectionHeading>
-          <Option name="method" value="imgbb" onChecked={() => setMethod('imgbb')} defaultChecked>
+          <Option
+            name="method"
+            value="imgbb"
+            onChecked={() => setMethod('imgbb')}
+            defaultChecked={method === 'imgbb'}
+          >
             <UploadMethodName>ImgBB</UploadMethodName>
             <BulletPoint>Uploaded files will be autodeleted in 10 minutes</BulletPoint>
             <BulletPoint>Supports WEBP images</BulletPoint>
           </Option>
-          <Option name="method" value="imgur" onChecked={() => setMethod('imgur')}>
+          <Option
+            name="method"
+            value="imgur"
+            onChecked={() => setMethod('imgur')}
+            defaultChecked={method === 'imgur'}
+          >
             <UploadMethodName>Imgur</UploadMethodName>
             <BulletPoint>The file will not be deleted (hopefully)</BulletPoint>
             <BulletPoint>
@@ -139,6 +178,13 @@ const App = () => {
         </FlexColumn>
         <FlexColumn gap="1em" align="center">
           <MainHeading>Just paste an image!</MainHeading>
+          {clipboardReadAction !== null && (
+            <>
+              <div>or...</div>
+              <Button onClick={onPasteButtonClick}>Read from clipboard</Button>
+            </>
+          )}
+          <PasteError>{pasteError}</PasteError>
           <div>or...</div>
           <InputBlock errorText={fileError}>
             <FileUploader accept="image/*" onFileChanged={setSelectedFile} />
@@ -150,8 +196,8 @@ const App = () => {
           <InputBlock errorText={urlError}>
             <URLInput
               placeholder="Enter an image URL"
-              onUrlSubmitted={setUrl}
-              onUrlChanged={setInputtedURL}
+              onUrlSubmit={onUrlSubmit}
+              onUrlChange={setInputtedURL}
             />
             <Button type="button" onClick={onUrlSubmit}>
               Search
@@ -173,7 +219,7 @@ const App = () => {
           <code>{error}</code>
         </section>
       )}
-      {isLoading && <p>Uploading the image...</p>}
+      {isLoading && <Loading>Uploading the image...</Loading>}
       {imageUrl && (
         <FlexColumn gap="2em">
           <section>

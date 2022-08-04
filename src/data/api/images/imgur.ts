@@ -1,7 +1,7 @@
 import ImgurClient from 'imgur';
 import { ImageUploadFunction } from './types';
 
-const uploadImgur: ImageUploadFunction = async (image: File) => {
+const uploadImgur: ImageUploadFunction = async (image: Blob) => {
   const client = new ImgurClient({ clientId: process.env.IMGUR_CLIENT_ID });
   return client
     .upload({
