@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { FlexColumn } from './components/layout/alignment/Flex';
 import SectionHeading from './components/text/SectionHeading';
 import SearchBlock from './components/search/SearchBlock';
@@ -19,6 +20,11 @@ import Button, { ResetButton } from './components/UI/input/Button';
 import URLInput from './components/UI/input/URLInput';
 import Loading from './components/UI/Loading';
 import useClipboardReadAction from './hooks/clipboard/clipboardRead';
+import InputError from './components/UI/input/InputError';
+
+const PasteError = styled(InputError)`
+  margin: -0.5em 0;
+`;
 
 const App = () => {
   const pastedData = usePasteEvent();
@@ -56,7 +62,13 @@ const App = () => {
 
   // Catch a file being pasted
   useEffect(() => {
+    if (pastedData === null || pastedData === undefined) {
+      return;
+    }
+
+    clearPasteError();
     if (!(pastedData instanceof File)) {
+      setPasteError('No images found in the clipboard.');
       return;
     }
     setFile(pastedData);
@@ -169,11 +181,10 @@ const App = () => {
           {clipboardReadAction !== null && (
             <>
               <div>or...</div>
-              <InputBlock errorText={pasteError}>
-                <Button onClick={onPasteButtonClick}>Read from clipboard</Button>
-              </InputBlock>
+              <Button onClick={onPasteButtonClick}>Read from clipboard</Button>
             </>
           )}
+          <PasteError>{pasteError}</PasteError>
           <div>or...</div>
           <InputBlock errorText={fileError}>
             <FileUploader accept="image/*" onFileChanged={setSelectedFile} />
