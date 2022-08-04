@@ -12,7 +12,13 @@ const usePasteEvent = () => {
   const [data, setData] = useState<File | string | null>();
 
   useEffect(() => {
-    const listener = (event: ClipboardEvent) => {
+    const handler = (event: ClipboardEvent) => {
+      // eslint-disable-next-line no-console
+      console.log(event);
+      if (event.target instanceof HTMLInputElement && event.target.type === 'text') {
+        return;
+      }
+
       getItem(event).then(
         (item) => {
           if (item.kind === 'string') {
@@ -24,11 +30,9 @@ const usePasteEvent = () => {
         () => setData(null),
       );
     };
-    document.addEventListener('paste', listener);
+    document.addEventListener('paste', handler);
 
-    return () => {
-      document.removeEventListener('paste', listener);
-    };
+    return () => document.removeEventListener('paste', handler);
   }, []);
   return data;
 };
