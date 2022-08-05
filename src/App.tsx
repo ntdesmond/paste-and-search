@@ -43,7 +43,7 @@ const App = () => {
   const uploadImage = useImageUpload(method);
   const navigate = useNavigate();
 
-  const setUrl = (url: string) => navigate(`?url=${url}`);
+  const setUrl = (url: string) => navigate(`?url=${encodeURIComponent(url)}`);
   const reset = () => {
     navigate('/');
     clearFile();
@@ -226,7 +226,7 @@ const App = () => {
             <SectionHeading>Link to your image:</SectionHeading>
             <ExternalURL href={imageUrl}>{imageUrl}</ExternalURL>
           </section>
-          <SearchBlock imageUrl={imageUrl} />
+          <SearchBlock imageUrl={encodeURIComponent(imageUrl)} />
         </FlexColumn>
       )}
     </FlexColumn>
