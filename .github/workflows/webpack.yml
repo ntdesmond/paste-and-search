@@ -36,6 +36,7 @@ jobs:
         env:
           IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
           IMGBB_KEY: ${{ secrets.IMGBB_KEY }}
+          GITHUB_REPO: ${{ github.repository }}
         
         run: |
           npm install
