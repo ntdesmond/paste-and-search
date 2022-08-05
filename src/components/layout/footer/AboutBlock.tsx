@@ -18,9 +18,7 @@ const AboutBlock = () => (
     </p>
     <p>
       Source code is available at{' '}
-      <ExternalURL href="https://github.com/paste-and-search/paste-and-search.github.io">
-        GitHub
-      </ExternalURL>
+      <ExternalURL href={`https://github.com/${process.env.GITHUB_REPO}`}>GitHub</ExternalURL>
     </p>
   </StyledBlock>
 );
