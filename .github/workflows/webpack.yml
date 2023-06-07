@@ -3,6 +3,7 @@ name: Build Webpack and deploy to Pages
 on:
   push:
     branches: ['main']
+  workflow_dispatch:
 
 # Allow one concurrent deployment
 concurrency:
