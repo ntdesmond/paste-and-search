@@ -2,7 +2,7 @@
 
 This website is made to ease _reverse image searching_. It uses image hosting APIs to upload the pictures, and shows the links to search the uploaded image with different search engines.
 
-You can find the deployed version at <https://findimage.ga>.
+You can find the deployed version at <https://ntdesmond.me/paste-and-search/>.
 
 ## Features
 
